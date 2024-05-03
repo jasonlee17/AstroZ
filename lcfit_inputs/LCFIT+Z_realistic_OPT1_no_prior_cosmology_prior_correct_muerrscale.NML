@@ -1,0 +1,72 @@
+
+CONFIG:
+  BATCH_INFO: sbatch  $SBATCH_TEMPLATES/SBATCH_DEFAULT.TEMPLATE 30
+  BATCH_WALLTIME:  '02:00:00'
+
+  OUTDIR: LCFIT+z_OUTPUT_REALISTIC_SN_PHOTOZ_ONLY_COSMOLOGY_PRIOR_CORRECT_MUERRSCALE
+  APPEND_TABLE_VARLIST:   PRIORCHI2
+  VERSION:
+  - JASON_DCR_ASTROZ_COADD_REALISTIC_v1113
+  
+#END_YAML
+
+# ================================================
+# below is science input for snlc_fit.exe
+
+ &SNLCINP
+    VERSION_PHOTOMETRY = 'JASON_DCR_ASTROZ_COADD_REALISTIC_v1113'
+
+   SNTABLE_LIST       = 'FITRES NOZPHOT SNANA(text:key,text:host)'
+   TEXTFILE_PREFIX    = 'OUT_DC2_TEST_REALISTIC_OPT4'
+   ROOTFILE_OUT       = 'OUT_DC2_TEST_REALISTIC_OPT4.ROOT'
+  !HFILE_OUT          = 'OUT_DC2_TEST_REALISTIC_OPT4.HBOOK'
+   ABORT_ON_NOEPOCHS  = F
+
+   KCOR_FILE = '$SNANA_LSST_ROOT/kcor/baseline/kcor_LSST.fits'
+
+   USE_MINOS      = F
+   NFIT_ITERATION = 3
+   OPT_SETPKMJD     = 16  ! 16=maxClump method; 4=> don't abort on trouble
+   OPT_MWEBV        =  0  ! do nothing since FLUXCAL is corrected by sim
+
+   cutwin_Nepoch    =  5
+   cutwin_redshift  =  0.00,  1.2
+   cutwin_redshift_err = 0.0, 0.002
+   cutwin_Trest     = -20.0, 50.0
+   cutwin_Trestmin  = -99.0, 0.0
+   cutwin_Trestmax  =  10.0, 200.0
+
+   CUTWIN_SNRMAX       =  4.0, 1.0E8
+   CUTWIN_NFILT_SNRMAX =  1.0, 99.
+
+   CUTWIN_SNRMAX2       = 3.0, 1.0E8
+   CUTWIN_NFILT_SNRMAX2 = 2, 99
+
+   OMAT_REF = 0.3, 0.03
+   W0_REF = -1.0, 0.1
+
+ &END
+
+ &FITINP
+     FITMODEL_NAME       = 'SALT3.P22-NIR' 
+     RESTLAMBDA_FITRANGE = 2000.0, 12000.0  
+
+     PRIOR_SHAPE_RANGE = -5.0, +4.0  ! flat prior to avoid craziness
+     PRIOR_MJDSIG      = 10          ! weak t0 prior to avoid craziness
+
+     FUDGEALL_ITER1_MAXFRAC = 0.05
+     
+     FITWIN_TREST = -15.0,  45.0     ! restrict epochs after 1st fit iter
+     FITWIN_SHAPE = -3.00, +2.00     ! cut on fitted x1 
+     FITWIN_COLOR = -0.30, +0.50     ! cut on fitted c
+     FITWIN_PROB  = -0.01,  1.01     ! cut on PROB(chi2,Ndof)
+     FILTLIST_FIT = 'ugrizY'         ! fit with all LSST bands
+
+     DOFIT_PHOTOZ = T
+     OPT_PHOTOZ       = 1         ! disable photo z fit by default
+     PHOTOZ_BOUND     = 0.01, 1.2 ! flat prior
+     INISTP_DLMAG     = 0.1       ! float MU or x0
+     PRIOR_ZERRSCALE  = 1000.0       ! nominal redshift uncertainty
+     PRIOR_MUERRSCALE = 1.0    ! large number -> no cosmology prior 
+  
+  &END
